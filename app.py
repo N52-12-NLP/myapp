@@ -1,7 +1,16 @@
 from flask import Flask, render_template, request
 import os
+import psycopg2
 
 app = Flask(__name__)
+
+conn = psycopg2.connect(
+    host='c.projekt-cloud-computing.postgres.database.azure.com',
+    port='5432',
+    user='citus',
+    password='123QWEasd',
+    database='citus'
+)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -9,11 +18,12 @@ def index():
         name = request.form.get('name')
         email = request.form.get('email')
         
-        # Perform any desired processing or data storage here
-        # For simplicity, we'll just print the values
-        
-        print(f"Name: {name}")
-        print(f"Email: {email}")
+        cur = conn.cursor()
+        query = "INSERT INTO users (name, email) VALUES (%s, %s)"
+        cur.execute(query, (name, email))
+        conn.commit()
+        cur.close()
+
 
         return "Data received successfully!"
     
